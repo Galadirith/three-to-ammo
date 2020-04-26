@@ -204,7 +204,7 @@ exports.createHullShape = (function() {
 
     let vertexCount = 0;
     _iterateGeometries(root, options, geo => {
-      vertexCount += geo.attributes.position.array.length / 3;
+      vertexCount += geo.drawRange.count;
     });
 
     const maxVertices = options.hullMaxVertices || 100000;
@@ -215,15 +215,16 @@ exports.createHullShape = (function() {
     const p = Math.min(1, maxVertices / vertexCount);
 
     _iterateGeometries(root, options, (geo, transform) => {
+      const length = geo.drawRange.count*3;
       const components = geo.attributes.position.array;
-      for (let i = 0; i < components.length; i += 3) {
+      for (let i = 0; i < length; i += 3) {
         if (Math.random() <= p) {
           vertex
             .set(components[i], components[i + 1], components[i + 2])
             .applyMatrix4(transform)
             .sub(center);
           btVertex.setValue(vertex.x, vertex.y, vertex.z);
-          originalHull.addPoint(btVertex, i === components.length - 3); // todo: better to recalc AABB only on last geometry
+          originalHull.addPoint(btVertex, i === length - 3); // todo: better to recalc AABB only on last geometry
         }
       }
     });
