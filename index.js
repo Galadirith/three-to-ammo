@@ -185,7 +185,6 @@ exports.createSphereShape = function(root, options) {
 
 exports.createHullShape = (function() {
   const vertex = new THREE.Vector3();
-  const center = new THREE.Vector3();
   return function(root, options) {
     options.type = TYPE.HULL;
     _setOptions(options);
@@ -195,12 +194,9 @@ exports.createHullShape = (function() {
       return null;
     }
 
-    const bounds = _computeBounds(root, options);
-
     const btVertex = new Ammo.btVector3();
     const originalHull = new Ammo.btConvexHullShape();
     originalHull.setMargin(options.margin);
-    center.addVectors(bounds.max, bounds.min).multiplyScalar(0.5);
 
     let vertexCount = 0;
     _iterateGeometries(root, options, geo => {
@@ -221,8 +217,7 @@ exports.createHullShape = (function() {
         if (Math.random() <= p) {
           vertex
             .set(components[i], components[i + 1], components[i + 2])
-            .applyMatrix4(transform)
-            .sub(center);
+            .applyMatrix4(transform);
           btVertex.setValue(vertex.x, vertex.y, vertex.z);
           originalHull.addPoint(btVertex, i === length - 3); // todo: better to recalc AABB only on last geometry
         }
